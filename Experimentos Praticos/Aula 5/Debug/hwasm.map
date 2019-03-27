@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v18.1.4                     
 ******************************************************************************
->> Linked Mon Mar 25 17:21:15 2019
+>> Linked Wed Mar 27 17:44:08 2019
 
-OUTPUT FILE NAME:   <hw.out>
-ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 0000c000
+OUTPUT FILE NAME:   <hwasm.out>
+ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 0000c026
 
 
 MEMORY CONFIGURATION
@@ -19,7 +19,7 @@ MEMORY CONFIGURATION
   INFOC                 00001040   00000040  00000000  00000040  RWIX
   INFOB                 00001080   00000040  00000000  00000040  RWIX
   INFOA                 000010c0   00000040  00000000  00000040  RWIX
-  FLASH                 0000c000   00003fde  0000003a  00003fa4  RWIX
+  FLASH                 0000c000   00003fde  0000004c  00003f92  RWIX
   BSLSIGNATURE          0000ffde   00000002  00000002  00000000  RWIX  ffff 
   INT00                 0000ffe0   00000002  00000002  00000000  RWIX
   INT01                 0000ffe2   00000002  00000000  00000002  RWIX
@@ -32,7 +32,7 @@ MEMORY CONFIGURATION
   INT08                 0000fff0   00000002  00000002  00000000  RWIX
   INT09                 0000fff2   00000002  00000002  00000000  RWIX
   INT10                 0000fff4   00000002  00000002  00000000  RWIX
-  INT11                 0000fff6   00000002  00000000  00000002  RWIX
+  INT11                 0000fff6   00000002  00000002  00000000  RWIX
   INT12                 0000fff8   00000002  00000002  00000000  RWIX
   INT13                 0000fffa   00000002  00000002  00000000  RWIX
   INT14                 0000fffc   00000002  00000002  00000000  RWIX
@@ -48,12 +48,12 @@ section   page    origin      length       input sections
                   000003b0    00000002     rts430_eabi.lib : boot.c.obj (.stack)
                   000003b2    0000004e     --HOLE--
 
-.text      0    0000c000    0000003a     
-                  0000c000    00000014     rts430_eabi.lib : boot.c.obj (.text:_c_int00_noinit_noargs)
-                  0000c014    00000014     main.obj (.text:main)
-                  0000c028    00000008     rts430_eabi.lib : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
-                  0000c030    00000006                     : exit.c.obj (.text:abort)
-                  0000c036    00000004                     : pre_init.c.obj (.text:_system_pre_init)
+.text      0    0000c000    0000004c     
+                  0000c000    00000026     main.obj (.text:main)
+                  0000c026    00000014     rts430_eabi.lib : boot.c.obj (.text:_c_int00_noinit_noargs)
+                  0000c03a    00000008                     : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
+                  0000c042    00000006                     : exit.c.obj (.text:abort)
+                  0000c048    00000004                     : pre_init.c.obj (.text:_system_pre_init)
 
 .cinit     0    0000c000    00000000     UNINITIALIZED
 
@@ -93,6 +93,10 @@ TIMER0_A0
 WDT        0    0000fff4    00000002     
                   0000fff4    00000002     rts430_eabi.lib : int10.asm.obj (.int10)
 
+COMPARATORA 
+*          0    0000fff6    00000002     
+                  0000fff6    00000002     rts430_eabi.lib : int11.asm.obj (.int11)
+
 TIMER1_A1 
 *          0    0000fff8    00000002     
                   0000fff8    00000002     rts430_eabi.lib : int12.asm.obj (.int12)
@@ -115,9 +119,9 @@ MODULE SUMMARY
        Module             code   ro data   rw data
        ------             ----   -------   -------
     .\
-       main.obj           20     0         0      
+       main.obj           38     0         0      
     +--+------------------+------+---------+---------+
-       Total:             20     0         0      
+       Total:             38     0         0      
                                                   
     C:\ti\ccsv8\tools\compiler\ti-cgt-msp430_18.1.4.LTS\lib\rts430_eabi.lib
        boot.c.obj         20     2         0      
@@ -133,15 +137,16 @@ MODULE SUMMARY
        int08.asm.obj      0      2         0      
        int09.asm.obj      0      2         0      
        int10.asm.obj      0      2         0      
+       int11.asm.obj      0      2         0      
        int12.asm.obj      0      2         0      
        int13.asm.obj      0      2         0      
        int14.asm.obj      0      2         0      
     +--+------------------+------+---------+---------+
-       Total:             38     26        0      
+       Total:             38     28        0      
                                                   
        Stack:             0      0         80     
     +--+------------------+------+---------+---------+
-       Grand Total:       58     26        80     
+       Grand Total:       76     28        80     
 
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
@@ -158,7 +163,9 @@ address   name
 00000057  BCSCTL1               
 00000058  BCSCTL2               
 00000053  BCSCTL3               
-0000c030  C$$EXIT               
+0000c042  C$$EXIT               
+00000059  CACTL1                
+0000005a  CACTL2                
 000010fb  CALBC1_12MHZ          
 000010f9  CALBC1_16MHZ          
 000010ff  CALBC1_1MHZ           
@@ -167,6 +174,7 @@ address   name
 000010f8  CALDCO_16MHZ          
 000010fe  CALDCO_1MHZ           
 000010fc  CALDCO_8MHZ           
+0000005b  CAPD                  
 00000056  DCOCTL                
 00000128  FCTL1                 
 0000012a  FCTL2                 
@@ -246,7 +254,7 @@ address   name
 00000120  WDTCTL                
 00000400  __STACK_END           
 00000050  __STACK_SIZE          
-0000c028  __TI_ISR_TRAP         
+0000c03a  __TI_ISR_TRAP         
 0000ffe0  __TI_int00            
 0000ffe4  __TI_int02            
 0000ffe6  __TI_int03            
@@ -256,6 +264,7 @@ address   name
 0000fff0  __TI_int08            
 0000fff2  __TI_int09            
 0000fff4  __TI_int10            
+0000fff6  __TI_int11            
 0000fff8  __TI_int12            
 0000fffa  __TI_int13            
 0000fffc  __TI_int14            
@@ -263,12 +272,12 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size   
 ffffffff  __TI_prof_data_start  
 ffffffff  __c_args__            
-0000c000  _c_int00_noinit_noargs
+0000c026  _c_int00_noinit_noargs
 0000fffe  _reset_vector         
 000003b0  _stack                
-0000c036  _system_pre_init      
-0000c030  abort                 
-0000c014  main                  
+0000c048  _system_pre_init      
+0000c042  abort                 
+0000c000  main                  
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -311,6 +320,9 @@ address   name
 00000056  DCOCTL                
 00000057  BCSCTL1               
 00000058  BCSCTL2               
+00000059  CACTL1                
+0000005a  CACTL2                
+0000005b  CAPD                  
 0000005d  UCA0ABCTL             
 0000005e  UCA0IRTCTL            
 0000005f  UCA0IRRCTL            
@@ -373,12 +385,12 @@ address   name
 000010fd  CALBC1_8MHZ           
 000010fe  CALDCO_1MHZ           
 000010ff  CALBC1_1MHZ           
-0000c000  _c_int00_noinit_noargs
-0000c014  main                  
-0000c028  __TI_ISR_TRAP         
-0000c030  C$$EXIT               
-0000c030  abort                 
-0000c036  _system_pre_init      
+0000c000  main                  
+0000c026  _c_int00_noinit_noargs
+0000c03a  __TI_ISR_TRAP         
+0000c042  C$$EXIT               
+0000c042  abort                 
+0000c048  _system_pre_init      
 0000ffe0  __TI_int00            
 0000ffe4  __TI_int02            
 0000ffe6  __TI_int03            
@@ -388,6 +400,7 @@ address   name
 0000fff0  __TI_int08            
 0000fff2  __TI_int09            
 0000fff4  __TI_int10            
+0000fff6  __TI_int11            
 0000fff8  __TI_int12            
 0000fffa  __TI_int13            
 0000fffc  __TI_int14            
@@ -397,4 +410,4 @@ ffffffff  __TI_prof_data_size
 ffffffff  __TI_prof_data_start  
 ffffffff  __c_args__            
 
-[121 symbols]
+[125 symbols]
