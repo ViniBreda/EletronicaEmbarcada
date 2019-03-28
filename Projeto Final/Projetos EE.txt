@@ -1,0 +1,7 @@
+Modulador MIDI
+
+
+Links:
+https://www.instructables.com/id/DIY-USB-DJ-Controller/
+https://www.instructables.com/id/What-is-MIDI/
+https://www.instructables.com/id/Send-and-Receive-MIDI-with-Arduino/
