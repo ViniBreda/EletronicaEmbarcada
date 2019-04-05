@@ -1,0 +1,115 @@
+Para as questões 2 a 5, considere que as variáveis `f`, `g`, `h`, `i` e `j` são do tipo inteiro (16 bits na arquitetura do MSP430), e que o vetor `A[]` é do tipo inteiro. Estas variáveis estão armazenadas nos seguintes registradores:
+	f: R4
+	g: R5
+	h: R6
+	i: R7
+	j: R8
+	A: R9
+Utilize os registradores R11, R12, R13, R14 e R15 para armazenar valores temporários.
+
+1. Escreva os trechos de código assembly do MSP430 para:
+	(a) Somente setar o bit menos significativo de R5.
+
+			bis 	#0x0001, R5
+
+	(b) Somente setar dois bits de R6: o menos significativo e o segundo menos significativo.
+
+			bis 	#0x0003, R6
+
+	(c) Somente zerar o terceiro bit menos significativo de R7.
+
+			bis	#0x0004, R7
+
+	(d) Somente zerar o terceiro e o quarto bits menos significativo de R8.
+
+			bic	#0x0018, R8
+
+	(e) Somente inverter o bit mais significativo de R9.
+		
+			xor	#0x8000, R9
+
+	(f) Inverter o nibble mais significativo de R10, e setar o nibble menos significativo de R10. 
+
+			xor	#0xF000, R10
+			bis	#0x000F, R10
+
+2. "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+
+```C
+	if(i>j) f = g+h+10;
+	else f = g-h-10;
+```
+
+```Assembly
+	if:		cmp 	R8, R7
+			jnc 	else
+			jz	endif
+			sub	R4,R4
+			add	R5,R4
+			add	R6,R4
+			add	#10,R4
+			jmp	endif
+	else:		sub	R4,R4
+			add	R5,R4
+			sub	R6,R4
+			sub	#10,R4
+	endif:
+```
+
+3. "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+
+```C
+	while(save[i]!=k) i++;
+```	
+
+```Assembly
+	while: 		mov.w	R7,R12			; R12 = temporário
+			rla 	R12			; R12 = 2*i
+			add.w 	R11, R12		; R11 = save, R12 = save + 2*i = &save[i]
+			cmp	0(R12), R13		; compara save[i] com k (R9)
+			jeq	exit			; save [i] != k?
+			inc.w 	R7			; i++
+			jmp	while			; volta pro loop
+	exit:
+```
+
+4. "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+
+```C
+	for(i=0; i<100; i++) A[i] = i*2;
+```
+
+```Assembly
+			sub	R7, R7			; R7 = i = 0
+	for:		cmp	#100, R7		; R7 - 100 = ?
+			jeq	endfor			; R7 = 100 sai do loop
+			mov.w	R7, R12			; R12 = temporário
+			rla	R12			; R12 = 2*i
+			mov.w	R12, R13		; R13 = 2*i
+			add.w	R9, R12			; R9 = A, R12 = A + 2*i = &A[i]
+			inc.w	R7			; R7++
+			mov.w	R13, 0(R12)		; A[i] = 2*i
+			jmp	for			; vai pro for incondicionalmente
+	endfor:
+```
+
+5. "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+
+```C
+	for(i=99; i>=0; i--) A[i] = i*2;
+```
+
+```Assembly
+			mov.w	#99, R7			; R7 = i = 99
+	for:		cmp	#-1, R7			; R7 = -1 ?
+			jeq	endfor			; se sim vai pro fim
+			mov.w	R7, R12			; R12 = temporário
+			rla	R12			; R12 = 2*i
+			mov.w	R12, R13		; R13 = 2*i
+			add.w	R9, R12			; R9 = A, R12 = A + 2*i = &A[i]
+			dec.w	R7			; R7--
+			mov.w	R13, 0(R12)		; A[i] = 2*i
+			jmp	for			; vai pro for incondicionalmente
+	endfor:
+	
+```
