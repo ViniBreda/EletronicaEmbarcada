@@ -1,0 +1,57 @@
+Questionário 5
+
+
+Escreva uma sub-rotina na linguagem Assembly do MSP430 que calcula a divisão de `a` por `b`, onde `a`, `b` e o valor de saída são inteiros de 16 bits. `a` e `b` são fornecidos através dos registradores R15 e R14, respectivamente, e a saída deverá ser fornecida através do registrador R15.
+
+main:
+			mov.w	#14 , R15
+			mov.w	#2  , R14
+			call	#divide
+			jmp	$
+
+divide:
+			push.w	R4
+			push.w	R5
+			push.w	R6
+			mov.w	R15  , R4				; R4 = a
+			mov.w	R14  , R5				; R5 = b
+			clr.w	R6
+loop:			cmp	#0, R4
+			jeq	endloop
+			sub	R5 , R4					; a = a - b
+			inc	R6					; div++
+			jmp 	loop
+endloop:
+			mov.w	R6 , R15
+			pop.w	R6
+			pop.w	R5
+			pop.w	R4
+			ret
+
+Escreva uma sub-rotina na linguagem Assembly do MSP430 que calcula o resto da divisão de `a` por `b`, onde `a`, `b` e o valor de saída são inteiros de 16 bits. `a` e `b` são fornecidos através dos registradores R15 e R14, respectivamente, e a saída deverá ser fornecida através do registrador R15.
+
+
+main:
+			mov.w	#33 , R15
+			mov.w	#3  , R14
+			call	#resto
+			jmp $
+
+resto:
+			push.w	R4
+			push.w	R5
+			push.w	R6
+			clr.w	R6
+			mov.w	R15  , R4				; R4 = a
+			mov.w	R14  , R5				; R5 = b
+loop:
+			sub	R5 , R4					; a = a - b
+			jn	endloop
+			mov.w	R4, R6
+			jmp 	loop
+endloop:
+			mov.w	R6 , R15
+			pop.w	R6
+			pop.w	R5
+			pop.w	R4
+			ret
