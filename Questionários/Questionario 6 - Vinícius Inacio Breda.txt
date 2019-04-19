@@ -1,0 +1,33 @@
+Questionário 6
+
+1. Qual a diferença entre funções e interrupções?
+
+	Funções são chamadas pelo código enquanto interrupções são chamadas por hardware em tempos imprevisíveis e em maneiras desordenadas.
+
+2. O que são ISRs?
+
+	São "interrupt service routines" e são quase idênticas à subrotinas, porem com duas distinções:
+	- O endereço da subrotina deve ser guardado em um vetor de interrupt apropriado;
+	- A rotina deve terminar com "reti" e não "ret" para que a ordem correta de ações ocorra quando voltar.
+	São chamadas por periféricos e interrompem a execução normal da cpu para executar tarefas de maior prioridade.
+
+3. Qual a diferença entre interrupções mascaráveis e não mascaráveis?
+
+	Interrupções marcaráveis são efetivas somente se o enable geral de interrupção (GIE) estiver setado no registrador de status, sendo ignorados se GIE estiver zerado. Interrupções não mascaráveis não podem ser suprimidas ao limpar GIE e sempre acntecem ao serem chamadas, porém requerem que bits sejam setados em função especial ou registradores periféricos para serem liberados.
+
+4. Como o MSP430 lida com interrupções simultâneas?
+
+	A MSP430 seleciona o interrupt de maior prioridade, checkando a vector table. As prioridades são pré-definidas no hardware e são proporcionais ao endereço, portanto, a interrupção com maior endereço possui maior prioridade e, então, é executada primeiro.
+
+5. Descreva o que acontece quando ocorre uma interrupção no MSP430 e qual é a pior latência entre o pedido de interrupção e a execução da ISR.
+
+	1. Qualquer instrução atualmente em execução é completada se a CPU estiver ativa quando o
+	a interrupção foi solicitada. O MCLK é iniciado se a CPU estiver desligada.
+	2. O PC, que aponta para a próxima instrução, é empurrado para a pilha.
+	3. O SR é empurrado para a pilha.
+	4. A interrupção com a prioridade mais alta é selecionada se várias interrupções estiverem aguardando serviço.
+	5. O sinalizador de solicitação de interrupção é apagado automaticamente para vetores que possuem uma única fonte. As bandeiras permanecem definidas para manutenção por software se o vetor tiver múltiplas fontes.
+	6. O SR é limpo, o que tem dois efeitos. Primeiro, outras interrupções que podem ser mascaradas são desabilitadas porque o bit GIE é desabilitado; as interrupções não mascaráveis permanecem ativas. Em segundo lugar, ele encerra qualquer modo de baixa potência.
+	7. O vetor de interrupção é carregado no PC e a CPU começa a executar o interromper a rotina de serviço nesse endereço.
+
+Esta sequência leva seis ciclos de clock no MSP430 antes do início do ISR. A posição do SR na pilha é importante se o modo de operação de baixa potência precisa ser alterado. O atraso entre uma interrupção sendo solicitada e o início da ISR é chamado de latência. Se a CPU já está em execução, é dado o tempo para executar a instrução atual, que pode ter acabado de começar quando a interrupção foi solicitada, mais o seis ciclos necessários para executar a sequência de lançamento. Isso deve ser calculado para a instrução mais lenta para obter o pior caso. As instruções do Formato I levam até 6 ciclos de clock, a latência total é de 12 ciclos.
