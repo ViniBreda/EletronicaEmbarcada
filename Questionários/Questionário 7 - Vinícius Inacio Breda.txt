@@ -1,0 +1,93 @@
+Para todas as questões, utilize os LEDs e/ou os botões da placa Launchpad do MSP430.
+
+1. Escreva um código em C que pisca os LEDs ininterruptamente.
+
+#include <msp430g2553.h>
+
+#define LEDS (BIT0|BIT6)
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+    P1OUT = ~LEDS;
+    P1DIR |= LEDS;
+    CCR0 = 50000;
+    TACCTL0 = CCIE;
+    TACTL = MC_1 + ID_3 + TASSEL_2 + TACLR;
+    __bis_SR_register(GIE + LPM0_bits);
+}
+
+
+#pragma vector = TIMER0_A0_VECTOR
+
+__interrupt void Timer_A0 (void)
+{
+    P1OUT ^= LEDS;
+}
+
+
+2. Escreva um código em C que pisca os LEDs ininterruptamente. No ciclo que pisca os LEDs, o tempo que os LEDs ficam ligados deve ser duas vezes maior do que o tempo que eles ficam desligados.
+
+#include <msp430g2553.h>
+
+#define LEDS (BIT0|BIT6)
+
+int ic = 0;
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+    P1OUT = ~LEDS;
+    P1DIR |= LEDS;
+    CCR0 = 50000;
+    TACCTL0 = CCIE;
+    TACTL = MC_1 + ID_3 + TASSEL_2 + TACLR;
+    __bis_SR_register(GIE + LPM0_bits);
+}
+
+
+
+#pragma vector = TIMER0_A0_VECTOR
+
+__interrupt void Timer_A0 (void)
+{
+    if(ic == 2)
+        P1OUT = LEDS;
+    if(ic == 6) // 6 pois conta um interrupt inicial que já faz o ic receber 1 direto
+    {
+        P1OUT = ~LEDS;
+        ic = 0;
+    }
+    ic++;
+}
+
+
+3. Escreva um código em C que acende os LEDs quando o botão é pressionado.
+
+#include <msp430g2553.h>
+
+#define LEDS (BIT0|BIT6)
+#define BUTTON BIT3
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+    P1DIR |= LEDS;
+    P1OUT &= ~LEDS;
+    P1IES |= BUTTON;
+    P1IE |= BUTTON;
+    P1REN |= BUTTON;
+    P1IFG &= ~BUTTON;
+
+    __bis_SR_register(GIE + LPM0_bits);
+}
+
+
+
+
+#pragma vector = PORT1_VECTOR
+__interrupt void PORT1_ISR(void)
+{
+    P1OUT |= LEDS;
+    P1IFG &= ~BUTTON;
+}
