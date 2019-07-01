@@ -1,0 +1,189 @@
+A) 
+    A) Faz toggle no led vermelho da porta P1.6, de acordo com o interrupt de tempo que utiliza o SMCLK, em contagem UP/DOWN, dividindo o clock por 8 e contando até 62500. A msp fica em LPM1 e acorda quando os interrupts acontecem. O toggle ocorre somente se o interrupt for proveniente de um overflow no TAIFG, ou seja, se a contagem chegar no limite de 62500.
+
+    B) Faz toggle no led verde da porta P1.0, de acordo com o interrupt de tempo que utiliza o SMCLK, em contagem Up to CCR0 e dividindo o clock por 8. A msp fica em LPM1 e acorda quando os interrupts acontecem. O toggle ocorre somente quando o interrupt ocorre, ou seja, quando o timer A contar até 49999;
+
+    C) Faz toggle nos dois leds, P1.0 e P1.6, da placa com interrupts no modo updown que conta até 65535. Mas o led vermelho começa aceso.
+
+    D) Faz toggle em ambos os leds separadamente utilizando timer A0 e o timer A1, A0 em modo contínuo para cima e A1 em updown. Ambos dividem seus clocks base por 8, mas A0 utiliza o SMCLK enquanto A1 utiliza o ACLK. O toggle do led Vermelho ocorre sempre que o timer contar até 62500 e o do led verde sempre que contar até 6000. Ambos começar já acesos;
+
+    E) O led vermelho acende sempre que o botão é apertado por meio do interrupt de botão, que também reseta a contagem do timer A e a variavel global count, que é usada para dividir mais ainda o clock do timer. Se o botão não for pressionado os leds verde e vermelho ficarão sendo ligados e desligados de acordo com a interrupção do Timer A.
+
+    F) Led vermelho começa aceso e são ligados dois interrupts, um de botão e um de tempo. A cada 30 interrupts ocorre o toggle nos leds vermelho e verde,  a variável state é alternada, ou seja, se for 0 vai pra 1, se for 1 vai para 0 e a variável done, que limita o funcionamento do código é acrescida em 1. Ao apertar o botão, se a variável state for 0, a varíavel que conta quantos vermelhos ocorreram é atualizada, caso contrário, a varíavel que conta quantos verdes ocorreram que será atualizada. O código continua até done ser maior que 5, onde as interrupções são desativadas e todos os leds, apagados.
+
+B)
+
+#include <msp430g2553.h>
+
+#define     GNLED   BIT0
+#define     RDLED   BIT6
+#define     TEMPO   1       // 10s = 0; 1 min = 1; 1h = 2; 1 dia = 3;
+
+const int time = TEMPO;
+int count = 0;
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;                                               // stop watchdog timer
+    P1OUT = 0;                                                              // nada ligado
+    P1OUT |= GNLED;                                                         // somente o led verde ligado
+    P1DIR |= GNLED|RDLED;                                                   // seta todos os outros pinos como input menos os dos LEDs, que são setados como output
+    TA0CCR0 = 62499;                                                        // divide o clock para um período de 0.5s
+    TA0CCTL0 = CCIE;
+    TA0CTL = MC_1 | ID_3 | TASSEL_2 | TACLR;                                // conta até ccr0 e divide o SMCLK por 8
+    while(1)
+    {
+        __bis_SR_register(GIE | LPM0_bits);
+    }
+}
+
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void Timer0_A0 (void)
+{
+    LPM0_EXIT;
+    if(TEMPO == 0)
+    {
+        if(count == 20) // para 10s
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 1)
+    {
+        if(count == 120) // para 1min
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 2)
+    {
+        if(count == 7200) // para 1h
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 3)
+    {
+        if(count == 172800) // para 1dia
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+}
+
+C)
+
+#include <msp430g2553.h>
+
+#define     GNLED   BIT0
+#define     RDLED   BIT6
+#define     BTN     BIT3
+#define     TEMPO   0       // 10s = 0; 1 min = 1; 1h = 2; 1 dia = 3;
+
+
+const int time = TEMPO;
+int count = 0;
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;                                               // stop watchdog timer
+    P1OUT = 0;                                                              // nada ligado
+    P1OUT |= GNLED;                                                         // somente o led verde ligado
+    P1DIR |= GNLED|RDLED;                                                   // seta todos os outros pinos como input menos os dos LEDs, que são setados como output
+// TIMER A INTERRUPT SETUP
+    TA0CCR0 = 62499;                                                        // divide o clock para um período de 0.5s
+    TA0CCTL0 = CCIE;
+    TA0CTL = MC_1 | ID_3 | TASSEL_2 | TACLR;                                // conta até ccr0 e divide o SMCLK por 8
+// BTN INTERRUPT SETUP
+    P1IE = BTN;
+    P1IES = BTN;
+    P1IFG = 0;
+    while(1)
+    {
+        __bis_SR_register(GIE | LPM0_bits);
+    }
+}
+
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void Timer0_A0 (void)
+{
+    LPM0_EXIT;
+    if(TEMPO == 0)
+    {
+        if(count == 20) // para 10s
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 1)
+    {
+        if(count == 120) // para 1min
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 2)
+    {
+        if(count == 7200) // para 1h
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+    else if(TEMPO == 3)
+    {
+        if(count == 172800) // para 1dia
+        {
+            P1OUT ^= GNLED|RDLED; //toggle nos leds
+            count = 0; // reseta o count
+        }
+        else
+        {
+            count++;
+        }
+    }
+}
+
+#pragma vector = PORT1_VECTOR
+__interrupt void PORT1_ISR(void){
+    LPM0_EXIT;
+    count = 0;
+    TACTL |= TACLR;
+    P1OUT = 0;                                                              // nada ligado
+    P1OUT |= GNLED;                                                         // somente o led verde ligado
+    P1IFG = 0;
+}
